@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Droit à l'image — Zalando × Marius Rosière</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --ink: #1a1a1a;
+    --ink-muted: #6b6b6b;
+    --ink-faint: #b0b0b0;
+    --surface: #ffffff;
+    --surface-alt: #f7f6f3;
+    --border: #e0ddd7;
+    --border-strong: #c8c5be;
+    --accent: #ff6900;
+    --accent-light: #fff2eb;
+    --success: #1a7a4a;
+    --success-light: #edf7f2;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: var(--surface-alt);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--ink);
+    color: white;
+    padding: 20px 24px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-brand {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    font-family: -apple-system, sans-serif;
+  }
+  .header-counter {
+    font-family: -apple-system, sans-serif;
+    font-size: 13px;
+    color: rgba(255,255,255,0.75);
+    background: rgba(255,255,255,0.12);
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+  .header-counter span {
+    color: white;
+    font-weight: 600;
+  }
+
+  /* ── Main layout ── */
+  .main { padding: 20px 16px 40px; max-width: 760px; margin: 0 auto; }
+
+  /* ── Contract text ── */
+  .contract-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 20px;
+    margin-bottom: 20px;
+    font-size: 13.5px;
+    line-height: 1.75;
+    color: var(--ink);
+  }
+  .contract-card h2 {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-family: -apple-system, sans-serif;
+    color: var(--ink-muted);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .contract-text {
+    font-size: 13px;
+    line-height: 1.8;
+    color: #333;
+  }
+  .contract-text p { margin-bottom: 12px; }
+  .contract-text p:last-child { margin-bottom: 0; }
+
+  /* ── Form ── */
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 20px;
+    margin-bottom: 20px;
+  }
+  .form-card h2 {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-family: -apple-system, sans-serif;
+    color: var(--ink-muted);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .field { margin-bottom: 20px; }
+  .field label {
+    display: block;
+    font-family: -apple-system, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 8px;
+  }
+  .field input {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 18px;
+    font-family: 'Georgia', serif;
+    border: 1.5px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--surface-alt);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+  }
+  .field input:focus { border-color: var(--accent); background: white; }
+  .field input::placeholder { color: var(--ink-faint); font-style: italic; }
+
+  /* ── Canvas signature ── */
+  .signature-wrap {
+    border: 1.5px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--surface-alt);
+    position: relative;
+    overflow: hidden;
+  }
+  .signature-wrap canvas {
+    display: block;
+    width: 100%;
+    touch-action: none;
+    cursor: crosshair;
+  }
+  .sig-placeholder {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: -apple-system, sans-serif;
+    font-size: 13px;
+    color: var(--ink-faint);
+    pointer-events: none;
+    text-align: center;
+    transition: opacity 0.2s;
+  }
+  .sig-placeholder.hidden { opacity: 0; }
+  .sig-baseline {
+    position: absolute;
+    bottom: 28px;
+    left: 20px;
+    right: 20px;
+    height: 1px;
+    background: var(--border);
+    pointer-events: none;
+  }
+  .sig-clear-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-family: -apple-system, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    cursor: pointer;
+    -webkit-appearance: none;
+  }
+  .sig-clear-btn:active { opacity: 0.6; }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    width: 100%;
+    padding: 18px;
+    font-family: -apple-system, sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: white;
+    background: var(--ink);
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    -webkit-appearance: none;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn-primary:active { opacity: 0.85; transform: scale(0.99); }
+  .btn-primary:disabled { opacity: 0.4; }
+
+  .btn-secondary {
+    width: 100%;
+    padding: 14px;
+    font-family: -apple-system, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink-muted);
+    background: transparent;
+    border: 1.5px solid var(--border-strong);
+    border-radius: var(--radius);
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: 10px;
+    transition: background 0.15s;
+  }
+  .btn-secondary:active { background: var(--border); }
+
+  /* ── Success screen ── */
+  .success-screen {
+    display: none;
+    background: var(--success-light);
+    border: 1px solid #a8d5bc;
+    border-radius: var(--radius);
+    padding: 32px 24px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .success-screen.visible { display: block; }
+  .success-icon {
+    width: 56px;
+    height: 56px;
+    background: var(--success);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+  }
+  .success-icon svg { width: 28px; height: 28px; }
+  .success-screen h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--success);
+    margin-bottom: 6px;
+  }
+  .success-screen p {
+    font-family: -apple-system, sans-serif;
+    font-size: 14px;
+    color: #3a7a5a;
+    margin-bottom: 20px;
+  }
+  .success-name {
+    font-size: 22px;
+    font-style: italic;
+    color: var(--success);
+    margin-bottom: 4px;
+  }
+
+  /* ── Sessions list ── */
+  .sessions-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .sessions-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .sessions-header h2 {
+    font-family: -apple-system, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .export-btn {
+    font-family: -apple-system, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-light);
+    border: none;
+    border-radius: 20px;
+    padding: 5px 14px;
+    cursor: pointer;
+    -webkit-appearance: none;
+  }
+  .export-btn:active { opacity: 0.7; }
+  .sessions-empty {
+    font-family: -apple-system, sans-serif;
+    font-size: 13px;
+    color: var(--ink-faint);
+    text-align: center;
+    padding: 12px 0;
+  }
+  .session-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-family: -apple-system, sans-serif;
+  }
+  .session-item:last-child { border-bottom: none; }
+  .session-name { font-size: 14px; font-weight: 500; }
+  .session-time { font-size: 11px; color: var(--ink-faint); }
+  .session-dl {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-light);
+    border: none;
+    border-radius: 20px;
+    padding: 4px 10px;
+    cursor: pointer;
+    -webkit-appearance: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-brand">Marius Rosière × Zalando</div>
+  </div>
+  <div class="header-counter">Signatures : <span id="counter">0</span></div>
+</div>
+
+<div class="main">
+
+  <!-- Success screen -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </div>
+    <p class="success-name" id="successName"></p>
+    <h3>Formulaire signé ✓</h3>
+    <p>Le PDF a été téléchargé.<br>Prêt pour la personne suivante.</p>
+    <button class="btn-primary" onclick="resetForm()" style="max-width:300px; margin:0 auto; display:block;">
+      Personne suivante →
+    </button>
+  </div>
+
+  <!-- Contract -->
+  <div class="contract-card" id="contractCard">
+    <h2>Autorisation — Droit à l'image</h2>
+    <div class="contract-text">
+      <p>Dans le cadre du tournage et de la production de matériel photographique et vidéographique réalisé le <strong>6 juin 2026</strong> au <strong>King Baudouin Stadium, Marathonlaan 135/2, 1020 Bruxelles</strong>, et dans lequel je suis capturé(e), j'accorde par la présente les droits et autorisations suivants à <strong>Marius Rosière</strong> et à <strong>Zalando SE</strong> ainsi qu'à toutes ses sociétés affiliées (« Zalando ») :</p>
+      <p>Je concède le droit révocable et limité quant au contenu, ainsi que l'autorisation, de prendre, utiliser, réutiliser, publier et republier des portraits vidéo et photographiques me représentant, en tout ou en partie. J'autorise que ces matériaux soient modifiés techniquement en couleur ou en forme, et qu'ils soient utilisés avec mon nom réel ou un nom fictif, sous réserve, dans ce dernier cas, de mon accord préalable.</p>
+      <p>Les matériaux pourront être utilisés et reproduits en lien avec Zalando à des fins de communication, notamment publicitaires, sur tous supports actuels et futurs, et en particulier sur les réseaux sociaux payants (TikTok, Meta) en Belgique, pendant une durée maximale de <strong>deux (2) mois</strong> après la fin de l'événement.</p>
+      <p>Marius Rosière et Zalando s'engagent à respecter mes droits moraux en toutes circonstances.</p>
+      <p>Je renonce à tout droit d'inspection ou d'approbation du produit fini, du contenu publicitaire ou de l'utilisation qui en est faite. Je renonce également à tout droit à des redevances ou à toute autre compensation liée à l'utilisation des matériaux.</p>
+      <p>Je déclare être majeur(e) et avoir la capacité de contracter en mon propre nom. J'ai lu et compris le présent document avant de le signer.</p>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="form-card" id="formCard">
+    <h2>Informations & Signature</h2>
+
+    <div class="field">
+      <label>Nom complet *</label>
+      <input type="text" id="nameInput" placeholder="Prénom Nom" autocomplete="off" autocorrect="off" spellcheck="false" />
+    </div>
+
+    <div class="field">
+      <label>Signature (avec le doigt) *</label>
+      <div class="signature-wrap">
+        <canvas id="sigCanvas" height="180"></canvas>
+        <div class="sig-baseline"></div>
+        <div class="sig-placeholder" id="sigPlaceholder">Signez ici avec le doigt</div>
+        <button class="sig-clear-btn" onclick="clearSignature()">Effacer</button>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="submitBtn" onclick="handleSubmit()">
+      Valider & Télécharger le PDF
+    </button>
+    <button class="btn-secondary" onclick="resetForm()">
+      Réinitialiser
+    </button>
+  </div>
+
+  <!-- Sessions -->
+  <div class="sessions-card">
+    <div class="sessions-header">
+      <h2>Signatures collectées</h2>
+      <button class="export-btn" onclick="exportCSV()">Exporter CSV</button>
+    </div>
+    <div id="sessionsList"><div class="sessions-empty">Aucune signature pour l'instant</div></div>
+  </div>
+
+</div>
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+// ── Canvas setup ──────────────────────────────────────────────
+const canvas = document.getElementById('sigCanvas');
+const ctx = canvas.getContext('2d');
+let drawing = false;
+let hasSig = false;
+let lastX = 0, lastY = 0;
+
+function resizeCanvas() {
+  const w = canvas.offsetWidth;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = w * dpr;
+  canvas.height = 180 * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.strokeStyle = '#1a1a1a';
+  ctx.lineWidth = 2.2;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+}
+resizeCanvas();
+window.addEventListener('resize', () => { resizeCanvas(); hasSig = false; });
+
+function getPos(e) {
+  const r = canvas.getBoundingClientRect();
+  const src = e.touches ? e.touches[0] : e;
+  return [src.clientX - r.left, src.clientY - r.top];
+}
+
+function startDraw(e) {
+  e.preventDefault();
+  drawing = true;
+  [lastX, lastY] = getPos(e);
+  ctx.beginPath();
+  ctx.moveTo(lastX, lastY);
+  document.getElementById('sigPlaceholder').classList.add('hidden');
+  hasSig = true;
+}
+function draw(e) {
+  if (!drawing) return;
+  e.preventDefault();
+  const [x, y] = getPos(e);
+  ctx.beginPath();
+  ctx.moveTo(lastX, lastY);
+  ctx.lineTo(x, y);
+  ctx.stroke();
+  [lastX, lastY] = [x, y];
+}
+function endDraw(e) { e.preventDefault(); drawing = false; }
+
+canvas.addEventListener('touchstart', startDraw, { passive: false });
+canvas.addEventListener('touchmove', draw, { passive: false });
+canvas.addEventListener('touchend', endDraw, { passive: false });
+canvas.addEventListener('mousedown', startDraw);
+canvas.addEventListener('mousemove', draw);
+canvas.addEventListener('mouseup', endDraw);
+canvas.addEventListener('mouseleave', endDraw);
+
+function clearSignature() {
+  const dpr = window.devicePixelRatio || 1;
+  ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+  hasSig = false;
+  document.getElementById('sigPlaceholder').classList.remove('hidden');
+}
+
+// ── Sessions ──────────────────────────────────────────────────
+let sessions = [];
+let counter = 0;
+
+function renderSessions() {
+  const el = document.getElementById('sessionsList');
+  if (sessions.length === 0) {
+    el.innerHTML = '<div class="sessions-empty">Aucune signature pour l\'instant</div>';
+    return;
+  }
+  el.innerHTML = sessions.map((s, i) => `
+    <div class="session-item">
+      <div>
+        <div class="session-name">${s.name}</div>
+        <div class="session-time">${s.time}</div>
+      </div>
+      <button class="session-dl" onclick="downloadPDF(${i})">PDF ↓</button>
+    </div>
+  `).join('');
+}
+
+// ── PDF Generation ────────────────────────────────────────────
+function generatePDF(name, sigDataUrl, dateStr) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const W = 210, margin = 20, cw = W - margin * 2;
+
+  // Header bar
+  doc.setFillColor(26, 26, 26);
+  doc.rect(0, 0, W, 28, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.text('MARIUS ROSIÈRE × ZALANDO', margin, 12);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(180, 180, 180);
+  doc.text('AUTORISATION — DROIT À L\'IMAGE', margin, 20);
+
+  // Date right
+  doc.setFontSize(8);
+  doc.text(dateStr, W - margin, 20, { align: 'right' });
+
+  let y = 40;
+
+  // Title
+  doc.setTextColor(26, 26, 26);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(13);
+  doc.text('Legal Release — Autorisation de droit à l\'image', margin, y);
+  y += 10;
+
+  // Contract body
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(50, 50, 50);
+
+  const body = [
+    'Dans le cadre du tournage et de la production de matériel photographique et vidéographique réalisé',
+    'le 6 juin 2026 au King Baudouin Stadium, Marathonlaan 135/2, 1020 Bruxelles, et dans lequel je suis',
+    'capturé(e), j\'accorde par la présente les droits et autorisations suivants à Marius Rosière et à Zalando',
+    'SE ainsi qu\'à toutes ses sociétés affiliées (« Zalando »).',
+    '',
+    'Je concède le droit révocable et limité quant au contenu, ainsi que l\'autorisation, de prendre, utiliser,',
+    'réutiliser, publier et republier des portraits vidéo et photographiques me représentant, en tout ou en',
+    'partie. J\'autorise que ces matériaux soient modifiés techniquement en couleur ou en forme, et qu\'ils',
+    'soient utilisés avec mon nom réel ou un nom fictif, sous réserve, dans ce dernier cas, de mon accord préalable.',
+    '',
+    'Les matériaux pourront être utilisés et reproduits en lien avec Zalando à des fins de communication,',
+    'notamment publicitaires, sur tous supports actuels et futurs, et en particulier sur les réseaux sociaux',
+    'payants (TikTok, Meta) en Belgique, pendant une durée maximale de deux (2) mois après la fin de l\'événement.',
+    '',
+    'Marius Rosière et Zalando s\'engagent à respecter mes droits moraux en toutes circonstances.',
+    '',
+    'Je renonce à tout droit d\'inspection ou d\'approbation du produit fini, du contenu publicitaire ou de',
+    'l\'utilisation qui en est faite. Je renonce également à tout droit à des redevances ou à toute autre',
+    'compensation liée à l\'utilisation des matériaux.',
+    '',
+    'Je déclare être majeur(e) et avoir la capacité de contracter en mon propre nom. J\'ai lu et compris le',
+    'présent document avant de le signer. Ce document engage mes héritiers, représentants légaux et ayants droit.',
+  ];
+
+  body.forEach(line => {
+    doc.text(line, margin, y);
+    y += 5;
+  });
+
+  y += 8;
+
+  // Divider
+  doc.setDrawColor(200, 200, 200);
+  doc.setLineWidth(0.3);
+  doc.line(margin, y, W - margin, y);
+  y += 10;
+
+  // Signature section
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(100, 100, 100);
+  doc.text('NOM :', margin, y);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(13);
+  doc.setTextColor(26, 26, 26);
+  doc.text(name, margin + 18, y);
+  y += 8;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(100, 100, 100);
+  doc.text('DATE & LIEU :', margin, y);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(60, 60, 60);
+  doc.text('6 juin 2026 — King Baudouin Stadium, Bruxelles', margin + 30, y);
+  y += 10;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(100, 100, 100);
+  doc.text('SIGNATURE :', margin, y);
+  y += 4;
+
+  // Signature image
+  const sigH = 35;
+  doc.addImage(sigDataUrl, 'PNG', margin, y, cw, sigH);
+  y += sigH + 4;
+
+  // Baseline under sig
+  doc.setDrawColor(26, 26, 26);
+  doc.setLineWidth(0.5);
+  doc.line(margin, y, W - margin, y);
+
+  // Footer
+  doc.setFillColor(245, 244, 241);
+  doc.rect(0, 285, W, 12, 'F');
+  doc.setFontSize(7);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(150, 150, 150);
+  doc.text('Document généré automatiquement — Marius Rosière DOP / Zalando SE', W / 2, 292, { align: 'center' });
+
+  return doc;
+}
+
+// ── Submit ────────────────────────────────────────────────────
+function handleSubmit() {
+  const name = document.getElementById('nameInput').value.trim();
+  if (!name) { alert('Merci d\'indiquer votre nom complet.'); return; }
+  if (!hasSig) { alert('Merci de signer dans le cadre prévu.'); return; }
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('fr-BE', { day: '2-digit', month: 'long', year: 'numeric' }) +
+    ' ' + now.toLocaleTimeString('fr-BE', { hour: '2-digit', minute: '2-digit' });
+
+  // Get signature as PNG
+  const tmpCanvas = document.createElement('canvas');
+  const dpr = window.devicePixelRatio || 1;
+  tmpCanvas.width = canvas.width;
+  tmpCanvas.height = canvas.height;
+  const tmpCtx = tmpCanvas.getContext('2d');
+  tmpCtx.fillStyle = '#ffffff';
+  tmpCtx.fillRect(0, 0, tmpCanvas.width, tmpCanvas.height);
+  tmpCtx.drawImage(canvas, 0, 0);
+  const sigDataUrl = tmpCanvas.toDataURL('image/png');
+
+  // Generate & download PDF
+  const doc = generatePDF(name, sigDataUrl, dateStr);
+  const safeName = name.replace(/[^a-z0-9]/gi, '_');
+  doc.save(`release_${safeName}_${now.getTime()}.pdf`);
+
+  // Store session
+  sessions.unshift({ name, time: dateStr, sigDataUrl, pdfData: doc.output('datauristring') });
+  counter++;
+  document.getElementById('counter').textContent = counter;
+  renderSessions();
+
+  // Show success
+  document.getElementById('successName').textContent = name;
+  document.getElementById('successScreen').classList.add('visible');
+  document.getElementById('contractCard').style.display = 'none';
+  document.getElementById('formCard').style.display = 'none';
+  window.scrollTo(0, 0);
+}
+
+function downloadPDF(i) {
+  const s = sessions[i];
+  const now = new Date();
+  const doc = generatePDF(s.name, s.sigDataUrl, s.time);
+  const safeName = s.name.replace(/[^a-z0-9]/gi, '_');
+  doc.save(`release_${safeName}.pdf`);
+}
+
+// ── Reset ─────────────────────────────────────────────────────
+function resetForm() {
+  document.getElementById('nameInput').value = '';
+  clearSignature();
+  document.getElementById('successScreen').classList.remove('visible');
+  document.getElementById('contractCard').style.display = '';
+  document.getElementById('formCard').style.display = '';
+  window.scrollTo(0, 0);
+}
+
+// ── CSV Export ────────────────────────────────────────────────
+function exportCSV() {
+  if (sessions.length === 0) { alert('Aucune signature collectée.'); return; }
+  const rows = [['Nom', 'Date et heure']];
+  sessions.forEach(s => rows.push([`"${s.name}"`, `"${s.time}"`]));
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'signatures_zalando_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

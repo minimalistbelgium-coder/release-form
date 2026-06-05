@@ -151,12 +151,16 @@
     background: var(--surface-alt);
     position: relative;
     overflow: hidden;
+    touch-action: none;
+    overscroll-behavior: none;
   }
   .signature-wrap canvas {
     display: block;
     width: 100%;
     touch-action: none;
     cursor: crosshair;
+    user-select: none;
+    -webkit-user-select: none;
   }
   .sig-placeholder {
     position: absolute;
@@ -362,8 +366,11 @@
     </div>
     <p class="success-name" id="successName"></p>
     <h3>Formulaire signé ✓</h3>
-    <p>Le PDF a été téléchargé.<br>Prêt pour la personne suivante.</p>
-    <button class="btn-primary" onclick="resetForm()" style="max-width:300px; margin:0 auto; display:block;">
+    <p>Appuie sur le bouton ci-dessous<br>pour sauvegarder le PDF.</p>
+    <button class="btn-primary" onclick="downloadLatestPDF()" style="max-width:300px; margin:0 auto 12px; display:block; background: var(--success);">
+      ↓ Télécharger le PDF
+    </button>
+    <button class="btn-secondary" onclick="resetForm()" style="max-width:300px; margin:0 auto; display:block;">
       Personne suivante →
     </button>
   </div>
@@ -471,9 +478,10 @@ function draw(e) {
 }
 function endDraw(e) { e.preventDefault(); drawing = false; }
 
-canvas.addEventListener('touchstart', startDraw, { passive: false });
-canvas.addEventListener('touchmove', draw, { passive: false });
-canvas.addEventListener('touchend', endDraw, { passive: false });
+canvas.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); startDraw(e); }, { passive: false });
+canvas.addEventListener('touchmove', (e) => { e.preventDefault(); e.stopPropagation(); draw(e); }, { passive: false });
+canvas.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); endDraw(e); }, { passive: false });
+canvas.addEventListener('touchcancel', (e) => { e.preventDefault(); endDraw(e); }, { passive: false });
 canvas.addEventListener('mousedown', startDraw);
 canvas.addEventListener('mousemove', draw);
 canvas.addEventListener('mouseup', endDraw);
@@ -650,13 +658,12 @@ function handleSubmit() {
   tmpCtx.drawImage(canvas, 0, 0);
   const sigDataUrl = tmpCanvas.toDataURL('image/png');
 
-  // Generate & download PDF
+  // Generate PDF and store (no auto-download)
   const doc = generatePDF(name, sigDataUrl, dateStr);
   const safeName = name.replace(/[^a-z0-9]/gi, '_');
-  doc.save(`release_${safeName}_${now.getTime()}.pdf`);
 
   // Store session
-  sessions.unshift({ name, time: dateStr, sigDataUrl, pdfData: doc.output('datauristring') });
+  sessions.unshift({ name, time: dateStr, sigDataUrl, safeName, ts: now.getTime() });
   counter++;
   document.getElementById('counter').textContent = counter;
   renderSessions();
@@ -667,6 +674,13 @@ function handleSubmit() {
   document.getElementById('contractCard').style.display = 'none';
   document.getElementById('formCard').style.display = 'none';
   window.scrollTo(0, 0);
+}
+
+function downloadLatestPDF() {
+  if (sessions.length === 0) return;
+  const s = sessions[0];
+  const doc = generatePDF(s.name, s.sigDataUrl, s.time);
+  doc.save(`release_${s.safeName}_${s.ts}.pdf`);
 }
 
 function downloadPDF(i) {

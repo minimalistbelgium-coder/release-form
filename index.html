@@ -494,9 +494,27 @@ function clearSignature() {
   document.getElementById('sigPlaceholder').classList.remove('hidden');
 }
 
-// ── Sessions ──────────────────────────────────────────────────
-let sessions = [];
-let counter = 0;
+// ── Sessions + localStorage ───────────────────────────────────
+const STORAGE_KEY = 'zalando_release_sessions';
+function loadSessions() {
+  try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : []; }
+  catch(e) { return []; }
+}
+function saveSessions() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions)); } catch(e) {}
+}
+function deleteSession(i) {
+  if (!confirm('Supprimer la signature de ' + sessions[i].name + ' ?')) return;
+  sessions.splice(i, 1);
+  counter = sessions.length;
+  document.getElementById('counter').textContent = counter;
+  saveSessions();
+  renderSessions();
+}
+
+let sessions = loadSessions();
+let counter = sessions.length;
+document.getElementById('counter').textContent = counter;
 
 function renderSessions() {
   const el = document.getElementById('sessionsList');
@@ -510,7 +528,10 @@ function renderSessions() {
         <div class="session-name">${s.name}</div>
         <div class="session-time">${s.time}</div>
       </div>
-      <button class="session-dl" onclick="downloadPDF(${i})">PDF ↓</button>
+      <div style="display:flex;gap:6px;">
+        <button class="session-dl" onclick="downloadPDF(${i})">PDF ↓</button>
+        <button class="session-dl" onclick="deleteSession(${i})" style="background:#fff0f0;color:#c0392b;">✕</button>
+      </div>
     </div>
   `).join('');
 }
@@ -664,6 +685,7 @@ function handleSubmit() {
 
   // Store session
   sessions.unshift({ name, time: dateStr, sigDataUrl, safeName, ts: now.getTime() });
+  saveSessions();
   counter++;
   document.getElementById('counter').textContent = counter;
   renderSessions();

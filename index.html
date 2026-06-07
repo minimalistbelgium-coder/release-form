@@ -419,7 +419,10 @@
   <div class="sessions-card">
     <div class="sessions-header">
       <h2>Signatures collectées</h2>
-      <button class="export-btn" onclick="exportCSV()">Exporter CSV</button>
+      <div style="display:flex;gap:8px;">
+        <button class="export-btn" onclick="exportCSV()">CSV</button>
+        <button class="export-btn" onclick="exportAllPDFs()" style="background:#fff2eb;color:#cc5500;">Tous les PDFs ↓</button>
+      </div>
     </div>
     <div id="sessionsList"><div class="sessions-empty">Aucune signature pour l'instant</div></div>
   </div>
@@ -428,6 +431,7 @@
 
 <!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <script>
 // ── Canvas setup ──────────────────────────────────────────────
@@ -721,6 +725,37 @@ function resetForm() {
   document.getElementById('contractCard').style.display = '';
   document.getElementById('formCard').style.display = '';
   window.scrollTo(0, 0);
+}
+
+// ── Export all PDFs as ZIP ───────────────────────────────────
+async function exportAllPDFs() {
+  if (sessions.length === 0) { alert('Aucune signature.'); return; }
+  const btn = event.target;
+  btn.textContent = 'Génération...';
+  btn.disabled = true;
+
+  try {
+    const zip = new JSZip();
+    sessions.forEach((s, i) => {
+      const doc = generatePDF(s.name, s.sigDataUrl, s.time);
+      const safeName = s.name.replace(/[^a-z0-9]/gi, '_');
+      const pdfBytes = doc.output('arraybuffer');
+      zip.file('release_' + safeName + '_' + (i+1) + '.pdf', pdfBytes);
+    });
+
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'releases_zalando_' + new Date().toISOString().slice(0,10) + '.zip';
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch(e) {
+    alert('Erreur : ' + e.message);
+  }
+
+  btn.textContent = 'Tous les PDFs ↓';
+  btn.disabled = false;
 }
 
 // ── CSV Export ────────────────────────────────────────────────
